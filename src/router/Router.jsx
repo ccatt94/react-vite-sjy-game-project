@@ -4,6 +4,7 @@ import App from "../App";
 import RspPage from "./../components/pages/RspPage";
 import LottoPage from "./../components/pages/LottoPage";
 import BoardListPage from "../components/pages/BoardListPage";
+import BoardWritePage from "../components/pages/BoardWritePage";
 
 const routes = [
   {
@@ -39,6 +40,11 @@ const routes = [
         path: "/boards",
         loader: () => "게시판",
         element: <BoardListPage />,
+      },
+      {
+        path: "/boards/write",
+        loader: () => "글쓰기",
+        element: <BoardWritePage />,
       },
     ],
   },
