@@ -42,8 +42,15 @@ const BoardListPage = () => {
 
     console.log(name + "::" + value);
 
-    boardService.remove(value);
-    initBoards();
+    boardService
+      .remove(value)
+      .then((response) => {
+        console.log(response);
+        initBoards();
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   return (
