@@ -100,7 +100,9 @@ const BoardListPage = () => {
                         <td>{board.bname}</td>
 
                         <td>
-                          <Link to={"/board/" + board.bid}>{board.btitle}</Link>
+                          <Link to={"/boards/" + board.bid}>
+                            {board.btitle}
+                          </Link>
                         </td>
 
                         <td>{board.bdate}</td>
