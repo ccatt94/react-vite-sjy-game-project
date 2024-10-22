@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import boardService from "../../services/BoardService";
 import { Link } from "react-router-dom";
-import Pagination from "./../board/Pagination";
+import Pagination from "../board/Pagination";
 
 const BoardListPage = () => {
   const [boards, setBoards] = useState([]);
   //http://192.168.0.10:8282/boards/list
+  const [paging, setPaging] = useState(null);
 
-  const [paging, setPaging] = useState({});
   // 정리하면 아래와 같다.
 
   // useEffect(() => {
@@ -44,13 +44,12 @@ const BoardListPage = () => {
 
   const deleteBoard = (e) => {
     const { name, value } = e.target;
-
     console.log(name + "::" + value);
 
     boardService
       .remove(value)
-      .then((response) => {
-        console.log(response);
+      .then((respose) => {
+        console.log(respose);
         initBoards();
       })
       .catch((e) => {
@@ -58,10 +57,26 @@ const BoardListPage = () => {
       });
   };
 
+  const onClickPaging = (e) => {
+    e.preventDefault(); // 기존에 링크 동작을 하지 말아라
+
+    console.log(e.target.pathname);
+    console.log(e.target.search);
+
+    boardService
+      .getPagingList(e.target.pathname, e.target.search)
+      .then((response) => {
+        setBoards(response.data.boards);
+        setPaging(response.data.page);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <div className="container mt-3">
       <div className="container-fluid">
-        {/* <!-- Page Heading --> */}
         <h1 className="h3 mb-2 text-gray-800">게시판</h1>
         <p className="mb-4">
           DataTables is a third party plugin that is used to generate the demo
@@ -72,6 +87,7 @@ const BoardListPage = () => {
           .
         </p>
 
+        {/* <!-- DataTales Example --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-3">
             <h6 className="m-0 font-weight-bold text-primary">
@@ -127,7 +143,12 @@ const BoardListPage = () => {
               </table>
             </div>
             {/* 페이징           */}
-            {<Pagination paging={paging}></Pagination>}
+            {paging != null ? (
+              <Pagination
+                paging={paging}
+                onClickPaging={onClickPaging}
+              ></Pagination>
+            ) : null}
             <hr />
             <Link to="/boards/write">
               <button type="button" className="btn btn-primary">
@@ -138,7 +159,7 @@ const BoardListPage = () => {
         </div>
       </div>
     </div>
-    // <!-- /.container-fluid -->
+    // <!-- /.container-fluid -->);
   );
 };
 
