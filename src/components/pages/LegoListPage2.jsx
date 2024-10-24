@@ -1,52 +1,41 @@
 import React, { useEffect, useState } from "react";
-import boardService from "../../services/BoardService";
-import { Link } from "react-router-dom";
+
 import axios from "axios";
-import LegoPagination from "../board/LegoPagination";
 
 const LegoListPage = () => {
-  let initPaging = {
-    // ✔ 화면에 보여질 페이지 그룹
-    // ✔ 화면에 보여질 첫번째 페이지
-    // ✔ 화면에 보여질 마지막 페이지
-    // ✔ 총 페이지 수
-    startPage: 1,
-    endPage: 10,
-    total: 0,
-    prev: false,
-    next: false,
-    pageNum: 1,
-    amount: 10, //고정
-  };
-
   const [boards, setBoards] = useState([]);
-  const [paging, setPaging] = useState(initPaging);
+  const [page, setPage] = useState(null);
+  const [pageNum, setPageNum] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     console.log("use Effective 실행");
     initBoards();
-  }, []);
+  }, [pageNum]);
 
-  const initBoards = (pageno = "1") => {
-    let url =
-      "https://sample.bmaster.kro.kr/contacts?pageno=" +
-      pageno +
-      "&pagesize=10";
+  const initBoards = () => {
+    const url = `https://sample.bmaster.kro.kr/contacts?pageno=${pageNum}&pagesize=10`;
     axios
       .get(url)
       .then((response) => {
         console.log(response);
         setBoards(response.data.contacts);
 
-        initPaging.pageNum = response.data.pageno;
-        initPaging.total = response.data.totalcount;
-        initPaging.endPage = initPaging.total / response.data.pagesize;
-        initPaging.startPage = 1; //endPage - 9;
+        const totalCount = response.data.totalcount;
+        const totalPages = Math.ceil(totalCount / pageSize);
 
-        setPaging(initPaging);
+        setPage({
+          pageNum: pageNum,
+          totalPages: totalPages,
+          prev: pageNum > 1,
+          next: pageNum < totalPages,
+        });
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
+      })
+      .finally(() => {
+        console.log("에러가 나든 안나든 무조건 실행");
       });
   };
 
@@ -57,10 +46,8 @@ const LegoListPage = () => {
     setBoards(boards.filter((board) => board.no !== value));
   };
 
-  const onClickPaging = (e) => {
-    e.preventDefault(); // 기존에 링크 동작을 하지 말아라
-    console.log(e.target.text);
-    initBoards(e.target.text);
+  const onClickPaging = (pages) => {
+    setPageNum(pages); // 페이지 클릭 시 현재 페이지 업데이트
   };
 
   return (
@@ -129,12 +116,26 @@ const LegoListPage = () => {
               </table>
             </div>
             {/* 페이징           */}
-            {paging != null ? (
-              <LegoPagination
-                paging={paging}
-                onClickPaging={onClickPaging}
-              ></LegoPagination>
-            ) : null}
+            <ul className="pagination justify-content-center">
+              {page != null
+                ? [...Array(page.totalPages)].map((_, index) => (
+                    <li
+                      className={`page-item ${
+                        pageNum === index + 1 ? "active" : ""
+                      }`}
+                      key={index}
+                    >
+                      <a
+                        href="#"
+                        onClick={() => onClickPaging(index + 1)} // 페이지 번호 클릭 시
+                        className="page-link"
+                      >
+                        {index + 1}
+                      </a>
+                    </li>
+                  ))
+                : null}
+            </ul>
 
             <hr />
           </div>
